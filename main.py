@@ -2,8 +2,9 @@ import json
 import requests
 import telebot
 import time
+import datetime as dt
 
-need_date = '21.03.2025'
+need_date = '26.03.2025'
 need_date = None
 
 def load_available_times():
@@ -15,8 +16,8 @@ def load_available_times():
     calendar = (data["response"]["calendar"])
     results = []
     for item in calendar:
-#        if (need_date is not None) and (need_date != item['day']):
-#            continue
+        if (need_date is not None) and (need_date != item['day']):
+            continue
         for schedule in item['_time']:
             if int(schedule['quantity']) > 0:
                 free_time = {'date': item['day'], 'time': schedule['time'], 'quantity': schedule['quantity']}
@@ -32,7 +33,7 @@ def get_text_messages(message):
             if len(results) > 0:
                 for available_time in results:
                     url = 'https://tickets.lakhta.events/event/23FA307410B1F9BE84842D1ABE30D6AB48EA2CF8'
-                    url += '/' + available_time['date']
+                    url += '/' + dt.datetime.strptime(available_time['date'], "%d.%m.%Y").strftime("%Y-%m-%d")
                     url += '/' + available_time['time']
                     print(url)
                     bot.send_message(
@@ -40,10 +41,8 @@ def get_text_messages(message):
                         'Ссылка на покупку билетов на ' + available_time['date'] + ' ' + available_time['time'] + " " + url
                     )
             time.sleep(60)
-
     elif message.text == "/help":
         bot.send_message(message.from_user.id, "Не могу тебе помочь)")
-
     else:
         bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
 bot.polling(none_stop=True, interval=0)
